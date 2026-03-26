@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<title>거울아 거울아</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:#2BBFA0; --teal-d:#1A9980; --teal-l:#D6F5EE;
+  --amber:#F5A623; --amber-l:#FFF4DC;
+  --coral:#FF6B52; --coral-l:#FFE8E4;
+  --purple:#7C5CBF; --purple-l:#EDE9FF;
+  --blue:#4DA8DA; --blue-l:#E0F2FF;
+  --pink:#E86FA0; --pink-l:#FFEBF4;
+  --green:#52C46A; --green-l:#E0F7E6;
+  --bg:#FFFBF5; --white:#FFF;
+  --text:#1E1E1E; --muted:#888; --border:#EAE4DA;
+  --sh:0 4px 20px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:18px;}html,body{width:100%;height:100%;overflow:hidden;font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text);}
+
+/* ── screens ── */
+.screen{display:none;position:absolute;inset:0;flex-direction:column;}
+.screen.on{display:flex;}
+
+/* ── topbar ── */
+.top{display:flex;align-items:center;padding:18px 28px;background:var(--white);border-bottom:1.5px solid var(--border);gap:14px;flex-shrink:0;}
+.top-back{width:52px;height:52px;border:none;background:var(--bg);border-radius:14px;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.top-title{font-family:'Jua',sans-serif;font-size:24px;flex:1;text-align:center;}
+.top-bgm{width:52px;height:52px;border:2px solid var(--border);background:var(--bg);border-radius:50%;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.vol-wrap{display:flex;align-items:center;gap:6px;}
+.vol-slider{width:70px;height:4px;accent-color:var(--teal);cursor:pointer;}
+
+/* ── shared ── */
+.body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;gap:20px;overflow:hidden;}
+.card{background:var(--white);border-radius:24px;box-shadow:var(--sh);padding:22px 20px;}
+.jua{font-family:'Jua',sans-serif;}
+.btn{font-family:'Jua',sans-serif;font-size:20px;border:none;border-radius:20px;padding:16px 28px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .15s;}
+.btn:active{transform:scale(.94);}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 3px 12px rgba(43,191,160,.3);}
+.btn-coral{background:var(--coral);color:#fff;box-shadow:0 3px 12px rgba(255,107,82,.3);}
+.btn-amber{background:var(--amber);color:#fff;box-shadow:0 3px 12px rgba(245,166,35,.25);}
+.btn-purple{background:var(--purple);color:#fff;box-shadow:0 3px 12px rgba(124,92,191,.3);}
+.btn-ghost{background:var(--bg);color:var(--text);border:1.5px solid var(--border);}
+.btn-big{width:100%;justify-content:center;font-size:24px;padding:20px;}
+.role-row{display:flex;gap:8px;justify-content:center;}
+.role-pill{font-size:17px;font-weight:800;padding:9px 22px;border-radius:24px;}
+.rp-m{background:var(--teal-l);color:var(--teal-d);}
+.rp-w{background:var(--purple-l);color:var(--purple);}
+
+/* progress bar */
+.pbar-wrap{width:100%;max-width:540px;}
+.pbar-labels{display:flex;justify-content:space-between;font-size:15px;color:var(--muted);margin-bottom:6px;}
+.pbar-labels .clabel{font-weight:800;}
+.pbar-bg{height:20px;background:var(--border);border-radius:10px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:8px;transition:width 1s linear,background .4s;}
+
+/* time ctrl row */
+.t-row{display:flex;align-items:center;gap:8px;}
+.t-btn{width:48px;height:48px;border-radius:50%;border:2px solid var(--teal);background:var(--teal-l);color:var(--teal-d);font-size:24px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.t-btn:active{transform:scale(.9);}
+.t-val{font-family:'Jua',sans-serif;font-size:28px;color:var(--teal);min-width:62px;text-align:center;}
+
+/* ring timer */
+.ring-wrap{position:relative;flex-shrink:0;}
+.ring-wrap svg{display:block;}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:9;}
+.ring-prog{fill:none;stroke:var(--teal);stroke-width:9;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:0;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1s linear,stroke .4s;}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-num{font-family:'Jua',sans-serif;font-size:86px;line-height:1;}
+.ring-unit{font-size:12px;color:var(--muted);}
+
+/* banner */
+#banner{position:fixed;inset:0;background:rgba(124,92,191,.93);z-index:400;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+#banner.on{display:flex;}
+#banner .b-icon{font-size:82px;animation:pop .5s cubic-bezier(.34,1.56,.64,1);}
+#banner .b-title{font-family:'Jua',sans-serif;font-size:70px;color:#fff;}
+#banner .b-sub{font-size:22px;color:rgba(255,255,255,.84);}
+#banner .b-btn{font-family:'Jua',sans-serif;font-size:28px;background:#fff;color:var(--purple);border:none;border-radius:22px;padding:20px 52px;cursor:pointer;margin-top:10px;}
+
+/* end popup */
+#endPopup{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;}
+#endPopup.on{display:flex;}
+.end-card{background:var(--white);border-radius:28px;padding:36px 30px;text-align:center;max-width:320px;width:88%;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.end-deco{font-size:80px;animation:pop .6s cubic-bezier(.34,1.56,.64,1);}
+.end-title{font-family:'Jua',sans-serif;font-size:40px;color:var(--teal);}
+.end-sub{font-size:18px;color:var(--muted);line-height:1.7;}
+.end-btn{font-family:'Jua',sans-serif;font-size:20px;background:var(--teal);color:#fff;border:none;border-radius:16px;padding:16px;width:100%;cursor:pointer;margin-top:6px;}
+
+/* confetti */
+.cfti{position:fixed;pointer-events:none;z-index:490;border-radius:2px;animation:cffall linear forwards;}
+@keyframes cffall{0%{transform:translateY(-10px) rotate(0);opacity:1;}100%{transform:translateY(105vh) rotate(700deg);opacity:0;}}
+
+@keyframes pop{from{transform:scale(.4)}to{transform:scale(1)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes bounce{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+/* ════ HOME ════ */
+#home .body{gap:22px;}
+.home-mirror{font-size:110px;animation:float 3s ease-in-out infinite;}
+.home-title{font-family:'Jua',sans-serif;font-size:68px;color:var(--teal);text-align:center;}
+.home-sub{font-size:13px;color:var(--muted);margin-top:-16px;}
+.mode-cards{display:flex;gap:18px;width:100%;max-width:900px;}
+.mode-card{flex:1;background:var(--white);border-radius:28px;padding:38px 20px;text-align:center;cursor:pointer;border:3px solid transparent;box-shadow:var(--sh);transition:transform .18s;user-select:none;}
+.mode-card:active{transform:scale(.95);}
+.mode-card.m1{border-color:var(--teal);}
+.mode-card.m2{border-color:var(--amber);}
+.mode-card.m3{border-color:var(--coral);}
+.mc-icon{font-size:72px;margin-bottom:16px;}
+.mc-num{font-size:11px;font-weight:800;margin-bottom:3px;}
+.m1 .mc-num{color:var(--teal);}.m2 .mc-num{color:var(--amber);}.m3 .mc-num{color:var(--coral);}
+.mc-name{font-family:'Jua',sans-serif;font-size:24px;line-height:1.4;}
+.mc-desc{font-size:15px;color:var(--muted);margin-top:8px;line-height:1.5;}
+
+/* ════ MODE 1 ════ */
+.sub-cards{display:flex;gap:22px;width:100%;max-width:780px;}
+.sub-card{flex:1;background:var(--white);border-radius:26px;padding:38px 24px;text-align:center;cursor:pointer;border:3px solid var(--teal);box-shadow:var(--sh);transition:transform .15s;}
+.sub-card:active{transform:scale(.95);}
+.sub-icon{font-size:76px;margin-bottom:18px;}
+.sub-name{font-family:'Jua',sans-serif;font-size:26px;margin-bottom:10px;}
+.sub-desc{font-size:16px;color:var(--muted);line-height:1.6;}
+.sub-how{font-size:15px;color:var(--teal-d);margin-top:12px;background:var(--teal-l);border-radius:13px;padding:12px 16px;line-height:1.6;}
+
+/* m1 setup */
+.setup-card{background:var(--white);border-radius:22px;padding:22px 24px;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:380px;}
+.setup-label{font-family:'Jua',sans-serif;font-size:14px;color:var(--muted);}
+
+/* prompt box */
+.prompt-box{background:var(--white);border-radius:20px;padding:20px;box-shadow:var(--sh);border:2px solid var(--teal-l);width:100%;max-width:540px;text-align:center;}
+.prompt-txt{font-family:'Jua',sans-serif;font-size:24px;color:var(--muted);line-height:1.7;white-space:pre-line;}
+
+/* ════ MODE 2 ════ */
+.prompt-big{background:var(--white);border-radius:28px;box-shadow:0 8px 32px rgba(0,0,0,.1);border:3px solid var(--amber);width:100%;max-width:460px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 20px 14px;flex:none;transition:transform .14s;}
+.prompt-big:active{transform:scale(.97);}
+.pe{font-size:80px;margin-bottom:8px;display:block;}
+.pn{font-family:'Jua',sans-serif;font-size:44px;}
+.pc{font-size:13px;color:var(--muted);margin-top:2px;}
+.tog-row{display:flex;background:var(--border);border-radius:12px;padding:3px;}
+.tog-btn{font-family:'Jua',sans-serif;font-size:13px;border:none;background:transparent;border-radius:9px;padding:7px 16px;cursor:pointer;color:var(--muted);transition:all .18s;}
+.tog-btn.on{background:var(--white);color:var(--amber);box-shadow:0 2px 6px rgba(0,0,0,.1);}
+
+/* m2 setup row */
+.setup-row{display:flex;align-items:center;justify-content:space-between;width:100%;}
+.setup-row-label{font-size:15px;font-weight:800;}
+
+/* ════ MODE 3 STORY ════ */
+.story-area{flex:1;position:relative;width:100%;overflow:hidden;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 20px;gap:12px;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s;transform:translateX(40px);}
+.slide.on{opacity:1;pointer-events:auto;transform:translateX(0);}
+.slide.out{opacity:0;transform:translateX(-40px);}
+.s-deco{font-size:90px;flex-shrink:0;}
+.s-title{font-family:'Jua',sans-serif;font-size:30px;color:var(--coral);text-align:center;}
+.s-body{font-size:17px;color:var(--text);line-height:1.85;text-align:center;max-width:640px;background:var(--white);border-radius:22px;padding:24px 30px;box-shadow:var(--sh);}
+.s-body strong{color:var(--coral);}
+.s-body em{color:var(--teal-d);font-style:normal;font-weight:800;}
+
+/* word cloud */
+.word-cloud{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:460px;}
+.cat-section{display:flex;flex-direction:column;gap:6px;width:100%;max-width:500px;}
+.cat-label{font-family:'Jua',sans-serif;font-size:12px;font-weight:800;padding:3px 10px;border-radius:10px;align-self:flex-start;}
+.cat-words{display:flex;flex-wrap:wrap;gap:6px;}
+.s-word{font-family:'Jua',sans-serif;font-size:16px;border-radius:20px;padding:9px 18px;cursor:pointer;transition:transform .12s;border:2px solid transparent;}
+.s-word:active{transform:scale(.93);}
+/* cat tab buttons in story */
+.cat-tab-btn{font-family:'Jua',sans-serif;font-size:12px;border:2px solid var(--border);background:transparent;border-radius:18px;padding:6px 12px;cursor:pointer;transition:all .18s;}
+.cat-tab-btn:active{transform:scale(.93);}
+.cat-tab-on{font-weight:800;}
+
+/* how steps */
+.how-list{display:flex;flex-direction:column;gap:8px;width:100%;max-width:480px;}
+.how-step{display:flex;align-items:flex-start;gap:10px;background:var(--white);border-radius:14px;padding:12px 14px;box-shadow:var(--sh);}
+.how-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Jua',sans-serif;font-size:15px;color:#fff;flex-shrink:0;}
+.how-txt{font-size:16px;line-height:1.65;color:var(--text);}
+.how-txt strong{font-weight:800;}
+
+/* dots */
+.dot-row{display:flex;gap:7px;justify-content:center;}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .25s;}
+.dot.on{background:var(--coral);transform:scale(1.3);}
+.story-nav{display:flex;gap:10px;justify-content:center;flex-shrink:0;padding-bottom:4px;}
+
+/* m3 prep */
+.m3-prep-body{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;}
+.sec-title{font-family:'Jua',sans-serif;font-size:15px;color:var(--coral);}
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{background:var(--white);border:2px solid var(--border);border-radius:22px;padding:10px 18px;font-family:'Jua',sans-serif;font-size:16px;cursor:pointer;transition:all .14s;user-select:none;}
+.chip.on{background:var(--coral);color:#fff;border-color:var(--coral);}
+.add-row{display:flex;gap:8px;}
+.add-inp{flex:1;font-family:'Nanum Gothic',sans-serif;font-weight:800;font-size:13px;border:2px solid var(--coral);border-radius:12px;padding:9px 12px;background:#fff;color:var(--text);}
+.add-inp:focus{outline:none;}
+.add-btn{background:var(--coral);color:#fff;border:none;border-radius:12px;padding:9px 16px;font-family:'Jua',sans-serif;font-size:14px;cursor:pointer;flex-shrink:0;}
+.settings-card{background:var(--white);border-radius:20px;padding:18px 20px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:14px;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;}
+.settings-label{font-size:17px;font-weight:800;}
+.t-btn-c{border-color:var(--coral);background:var(--coral-l);color:var(--coral);}
+.t-btn-p{border-color:var(--purple);background:var(--purple-l);color:var(--purple);}
+.t-val-c{color:var(--coral);}
+.t-val-p{color:var(--purple);}
+
+/* m3 play */
+.m3-card{background:var(--white);border-radius:32px;box-shadow:0 8px 36px rgba(0,0,0,.1);border:3px solid var(--coral);width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 28px;gap:10px;flex:1;max-height:210px;transition:border-color .3s,transform .2s,opacity .2s;}
+.m3-cat{font-size:16px;font-weight:800;padding:7px 20px;border-radius:20px;}
+.m3-txt{font-family:'Jua',sans-serif;font-size:54px;color:var(--text);line-height:1.4;text-align:center;}
+.m3-bottom{flex-shrink:0;padding:12px 18px 16px;background:var(--white);border-top:1.5px solid var(--border);display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+
+/* cat pill colors */
+.cp-jj{background:var(--green-l);color:#2a8a40;}
+.cp-hd{background:var(--teal-l);color:var(--teal-d);}
+.cp-nr{background:var(--coral-l);color:var(--coral);}
+.cp-mm{background:var(--purple-l);color:var(--purple);}
+.cp-td{background:var(--amber-l);color:#b07010;}
+.cp-hk{background:var(--blue-l);color:var(--blue);}
+.cp-gw{background:var(--pink-l);color:var(--pink);}
+.cp-etc{background:#f0f0f0;color:#555;}
+
+
+
+.pair-card{background:var(--white);border-radius:20px;padding:18px 22px;box-shadow:var(--sh);border:2.5px solid var(--purple-l);display:flex;align-items:center;gap:14px;min-width:200px;}
+.pair-num{width:36px;height:36px;border-radius:50%;background:var(--purple);color:#fff;font-family:'Jua',sans-serif;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pair-names{font-family:'Jua',sans-serif;font-size:20px;color:var(--text);line-height:1.5;}
+.pair-vs{font-size:13px;color:var(--muted);margin:0 4px;}
+
+
+/* PAIR SHUFFLE */
+.pair-stage{width:100%;max-width:640px;height:220px;position:relative;background:var(--white);border-radius:20px;border:2px solid var(--border);overflow:hidden;flex-shrink:0;}
+.name-tag{position:absolute;background:var(--purple);color:#fff;font-family:'Jua',sans-serif;font-size:18px;padding:9px 18px;border-radius:22px;white-space:nowrap;box-shadow:0 3px 12px rgba(124,92,191,0.3);transition:all 0.7s cubic-bezier(.34,1.1,.64,1);}
+.name-tag.mixing{transition:all 0.32s ease;}
+.name-tag.settled{background:var(--white);color:var(--text);border:2.5px solid var(--purple);}
+.pair-chip-result{background:var(--white);border:2.5px solid var(--purple);border-radius:22px;padding:10px 20px;font-family:'Jua',sans-serif;font-size:18px;color:var(--text);opacity:0;transform:scale(0.8);transition:all 0.4s cubic-bezier(.34,1.4,.64,1);}
+.pair-chip-result.show{opacity:1;transform:scale(1);}
+.pair-chip-result .pnum{font-size:13px;color:var(--purple);margin-bottom:2px;}
+
+@media(max-width:500px){
+  .mode-cards{flex-direction:column;max-height:60vh;overflow-y:auto;}
+  .home-title{font-size:34px;}
+  .sub-cards{flex-direction:column;}
+  .m3-txt{font-size:26px;}
+  .pn{font-size:30px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HOME ══════════════════════════════════════ -->
+<div id="home" class="screen on">
+  <div class="top">
+    <div style="width:38px"></div>
+    <div class="top-title jua">🪞 거울아 거울아</div>
+    <div class="vol-wrap">
+      <button class="top-bgm" id="bgmBtn">🔇</button>
+      <input class="vol-slider" type="range" id="volSlider" min="0" max="100" value="30">
+    </div>
+  </div>
+  <div class="body">
+    <div class="home-mirror">🪞</div>
+    <div style="text-align:center;">
+      <div class="home-title">거울아 거울아</div>
+      <div class="home-sub" style="margin-top:10px;">친구와 함께하는 칭찬 신체놀이</div>
+    </div>
+    <div class="mode-cards">
+      <div class="mode-card m1" id="hBtn1">
+        <div class="mc-icon">👀</div><div class="mc-num">모드 1</div>
+        <div class="mc-name">몸으로<br>따라하기</div>
+        <div class="mc-desc">바로 / 기억하고<br>따라하기</div>
+      </div>
+      <div class="mode-card m2" id="hBtn2">
+        <div class="mc-icon">🎭</div><div class="mc-num">모드 2</div>
+        <div class="mc-name">제시어<br>표현하기</div>
+        <div class="mc-desc">제시어를 듣고<br>몸으로 표현해요</div>
+      </div>
+      <div class="mode-card m3" id="hBtn3">
+        <div class="mc-icon">💬</div><div class="mc-num">모드 3</div>
+        <div class="mc-name">칭찬 문장<br>릴레이</div>
+        <div class="mc-desc">따뜻한 말을 듣고<br>몸으로 표현해요</div>
+      </div>
+    </div>
+    <button class="btn btn-big" id="hBtnPair" style="background:var(--purple-l);color:var(--purple);border:2px solid var(--purple);max-width:900px;width:100%;font-size:20px;">👫 짝꿍 랜덤으로 정하기</button>
+  </div>
+</div>
+
+
+<!-- ══ PAIR ══════════════════════════════════════ -->
+<div id="pairScreen" class="screen">
+  <div class="top">
+    <button class="top-back" id="pairBack">←</button>
+    <div class="top-title jua">👫 짝꿍 정하기</div>
+    <div style="width:52px;"></div>
+  </div>
+  <div class="body" id="pairSetup" style="gap:18px;">
+    <div style="font-size:50px;">🎲</div>
+    <div class="jua" style="font-size:26px;color:var(--purple);">친구 이름을 입력해요!</div>
+    <div style="width:100%;max-width:560px;display:flex;flex-direction:column;gap:10px;">
+      <div class="add-row">
+        <input class="add-inp" id="pairInp" placeholder="이름 입력 후 엔터" maxlength="6" style="border-color:var(--purple);font-size:18px;">
+        <button class="add-btn" id="pairAddBtn" style="background:var(--purple);font-size:18px;">+ 추가</button>
+      </div>
+      <div class="chips" id="pairChips" style="min-height:36px;"></div>
+      <div id="pairCount" style="font-size:14px;color:var(--muted);text-align:right;">0명</div>
+    </div>
+    <button class="btn btn-purple btn-big" id="pairShuffleBtn" style="max-width:560px;width:100%;font-size:24px;">🎲 짝꿍 정하기!</button>
+  </div>
+  <div class="body" id="pairResult" style="display:none;gap:14px;overflow-y:auto;">
+    <div class="jua" style="font-size:26px;color:var(--purple);" id="pairResultTitle">마구마구 섞는 중... 🌀</div>
+    <div class="pair-stage" id="pairStage"></div>
+    <div id="pairCards" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;max-width:700px;"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <button class="btn btn-purple" id="pairAgainBtn">🔄 다시 섞기</button>
+      <button class="btn btn-ghost" id="pairBackToSetup">← 명단 수정</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODE 1 ══════════════════════════════════════ -->
+<div id="mode1" class="screen">
+  <div class="top">
+    <button class="top-back" id="m1Back">←</button>
+    <div class="top-title jua" id="m1Title">모드 1 — 몸으로 따라하기</div>
+    <div class="vol-wrap">
+      <button class="top-bgm" id="bgmBtn1">🔇</button>
+      <input class="vol-slider" type="range" id="volSlider1" min="0" max="100" value="30">
+    </div>
+  </div>
+
+  <!-- sub select -->
+  <div class="body" id="m1Sel">
+    <div class="sub-cards">
+      <div class="sub-card" id="m1SubInstant">
+        <div class="sub-icon">⚡</div>
+        <div class="sub-name">바로 따라하기</div>
+        <div class="sub-desc">거울 친구가 하는 동작을<br>관찰자 친구가 바로 따라해요</div>
+        <div class="sub-how">🪞 거울이 자유롭게 동작해요<br>👁 관찰자가 즉시 따라해요</div>
+      </div>
+      <div class="sub-card" id="m1SubMemory">
+        <div class="sub-icon">🧠</div>
+        <div class="sub-name">기억하고 따라하기</div>
+        <div class="sub-desc">거울 친구의 동작을 기억했다가<br>신호에 맞춰 따라해요</div>
+        <div class="sub-how">🪞 거울 친구가 먼저 동작을 해요!<br>👁 잠깐 기다렸다가 그대로 따라해 주세요!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- setup -->
+  <div class="body" id="m1Setup" style="display:none;">
+    <div class="prompt-box" id="m1PromptBox">
+      <div class="prompt-txt" id="m1PromptTxt">🪞 거울이 자유롭게 동작하면<br>👁 관찰자가 바로 따라해요!</div>
+    </div>
+    <div class="setup-card">
+      <div class="setup-label">시간 설정</div>
+      <div class="t-row">
+        <button class="t-btn" id="m1Minus">−</button>
+        <div class="t-val" id="m1SetVal">60초</div>
+        <button class="t-btn" id="m1Plus">+</button>
+      </div>
+      <button class="btn btn-teal btn-big" id="m1StartBtn">▶ 시작하기</button>
+    </div>
+    <button class="btn btn-ghost" id="m1SetupBack">← 모드 선택</button>
+  </div>
+
+  <!-- play -->
+  <div class="body" id="m1Play" style="display:none;">
+    <div class="prompt-box">
+      <div class="prompt-txt jua" id="m1SubLabel" style="font-size:15px;color:var(--teal-d);">⚡ 바로 따라하기</div>
+    </div>
+    <div class="role-row">
+      <div class="role-pill rp-m" id="m1RoleA">🪞 거울</div>
+      <div class="role-pill rp-w" id="m1RoleB">🌟 표현친구</div>
+    </div>
+    <div class="ring-wrap">
+      <svg viewBox="0 0 120 120" width="240" height="240">
+        <circle class="ring-bg" cx="60" cy="60" r="50"/>
+        <circle class="ring-prog" id="m1Ring" cx="60" cy="60" r="50"/>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-num" id="m1Num" style="color:var(--teal);">60</div>
+        <div class="ring-unit">초</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+      <button class="btn btn-teal" id="m1SwapBtn">🔄 역할 바꾸기</button>
+      <button class="btn btn-ghost" id="m1StopBtn">⏹ 중단</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODE 2 ══════════════════════════════════════ -->
+<div id="mode2" class="screen">
+  <div class="top">
+    <button class="top-back" id="m2Back">←</button>
+    <div class="top-title jua" id="m2Title">모드 2 — 제시어 표현하기</div>
+    <div class="vol-wrap">
+      <button class="top-bgm" id="bgmBtn2">🔇</button>
+      <input class="vol-slider" type="range" id="volSlider2" min="0" max="100" value="30">
+    </div>
+  </div>
+
+  <!-- setup -->
+  <div class="body" id="m2Setup">
+    <div style="font-size:44px;">🎭</div>
+    <div class="jua" style="font-size:20px;color:var(--amber);">제시어 표현하기</div>
+    <div class="setup-card" style="max-width:400px;width:100%;gap:18px;">
+      <div class="setup-row">
+        <span class="setup-row-label">자동 / 클릭</span>
+        <div class="tog-row">
+          <button class="tog-btn on" id="m2Auto">⏱ 자동</button>
+          <button class="tog-btn" id="m2Manual">👆 클릭</button>
+        </div>
+      </div>
+      <div class="setup-row">
+        <span class="setup-row-label">제시어 바뀌는 시간</span>
+        <div class="t-row">
+          <button class="t-btn" id="m2PtM">−</button>
+          <div class="t-val" id="m2PtV">10초</div>
+          <button class="t-btn" id="m2PtP">+</button>
+        </div>
+      </div>
+      <div class="setup-row">
+        <span class="setup-row-label">전체 시간</span>
+        <div class="t-row">
+          <button class="t-btn" style="border-color:var(--purple);background:var(--purple-l);color:var(--purple);" id="m2RtM">−</button>
+          <div class="t-val" style="color:var(--purple);" id="m2RtV">45초</div>
+          <button class="t-btn" style="border-color:var(--purple);background:var(--purple-l);color:var(--purple);" id="m2RtP">+</button>
+        </div>
+      </div>
+      <button class="btn btn-amber btn-big" id="m2StartBtn">▶ 시작하기</button>
+    </div>
+  </div>
+
+  <!-- play -->
+  <div class="body" id="m2Play" style="display:none;gap:12px;">
+    <div class="pbar-wrap">
+      <div class="pbar-labels">
+        <span id="m2PtLeft">10초</span>
+        <span class="clabel" style="color:var(--amber);">다음 제시어까지</span>
+        <span id="m2PtRight">10초</span>
+      </div>
+      <div class="pbar-bg"><div class="pbar-fill" id="m2PtFill" style="width:100%;background:var(--amber);"></div></div>
+    </div>
+    <div class="pbar-wrap" style="opacity:.75;">
+      <div class="pbar-labels">
+        <span id="m2RtLeft">60초</span>
+        <span class="clabel" style="color:var(--purple);">전체 시간</span>
+        <span id="m2RtRight">60초</span>
+      </div>
+      <div class="pbar-bg" style="height:9px;"><div class="pbar-fill" id="m2RtFill" style="width:100%;background:var(--purple);height:9px;"></div></div>
+    </div>
+    <div class="role-row">
+      <div class="role-pill rp-m" id="m2RoleA">🪞 거울</div>
+      <div class="role-pill rp-w" id="m2RoleB">🌟 표현친구</div>
+    </div>
+    <div class="prompt-big" id="m2Card">
+      <span class="pe" id="m2Emoji">🐸</span>
+      <div class="pn" id="m2Name">개구리</div>
+      <div class="pc" id="m2Cat">동물</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;flex-shrink:0;">
+      <button class="btn btn-amber" id="m2NextBtn">다음 ▶</button>
+      <button class="btn btn-purple" id="m2SwapBtn">🔄 역할 바꾸기</button>
+      <button class="btn btn-ghost" id="m2StopBtn">⏹ 중단</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODE 3 ══════════════════════════════════════ -->
+<div id="mode3" class="screen">
+  <div class="top">
+    <button class="top-back" id="m3Back">←</button>
+    <div class="top-title jua" id="m3Title">모드 3 — 칭찬 이야기</div>
+    <div class="vol-wrap">
+      <button class="top-bgm" id="bgmBtn3">🔇</button>
+      <input class="vol-slider" type="range" id="volSlider3" min="0" max="100" value="30">
+    </div>
+  </div>
+
+  <!-- story -->
+  <div id="m3Story" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <div class="dot-row" id="dots" style="padding-top:10px;flex-shrink:0;"></div>
+    <div class="story-area" id="slides"></div>
+    <div class="story-nav">
+      <button class="btn btn-ghost" id="sPrev" style="min-width:80px;">← 이전</button>
+      <button class="btn btn-coral" id="sNext" style="min-width:150px;">다음 →</button>
+    </div>
+  </div>
+
+  <!-- prep -->
+  <div id="m3Prep" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;gap:18px;overflow-y:auto;">
+
+    <!-- 추가 입력 -->
+    <div class="how-list" style="max-width:520px;width:100%;">
+      <div class="how-step" style="flex-direction:column;gap:10px;align-items:stretch;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="how-num" style="background:var(--coral);">✏️</div>
+          <div class="how-txt"><strong>칭찬 문장 추가하기</strong><br>더 넣고 싶은 칭찬 말이 있으면 추가해요!</div>
+        </div>
+        <div class="add-row" style="margin-top:4px;">
+          <input class="add-inp" id="m3NewInp" placeholder="예: 함께해줘서 좋아!" maxlength="20">
+          <button class="add-btn" id="m3AddBtn">+ 추가</button>
+        </div>
+        <div class="chips" id="m3Chips"></div>
+      </div>
+    </div>
+
+    <!-- 시작 설정 -->
+    <div class="how-list" style="max-width:520px;width:100%;">
+      <div class="how-step" style="flex-direction:column;gap:14px;align-items:stretch;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="how-num" style="background:var(--purple);">⚙️</div>
+          <div class="how-txt"><strong>시작 설정</strong></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px;">
+          <span class="settings-label">문장 바뀌는 시간</span>
+          <div class="t-row">
+            <button class="t-btn t-btn-c" id="ptM">−</button>
+            <div class="t-val t-val-c" id="ptV">15초</div>
+            <button class="t-btn t-btn-c" id="ptP">+</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px;">
+          <span class="settings-label">한 판 시간</span>
+          <div class="t-row">
+            <button class="t-btn t-btn-p" id="rtM">−</button>
+            <div class="t-val t-val-p" id="rtV">45초</div>
+            <button class="t-btn t-btn-p" id="rtP">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-coral btn-big" id="m3StartBtn" style="max-width:520px;width:100%;">▶ 시작하기</button>
+  </div>
+
+  <!-- play -->
+  <div id="m3Play" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div class="body" style="justify-content:flex-start;padding:14px 18px;gap:10px;">
+      <div class="pbar-wrap">
+        <div class="pbar-labels">
+          <span id="m3PtLeft">10초</span>
+          <span class="clabel" style="color:var(--coral);">다음 문장까지</span>
+          <span id="m3PtRight">10초</span>
+        </div>
+        <div class="pbar-bg"><div class="pbar-fill" id="m3PtFill" style="width:100%;background:var(--coral);"></div></div>
+      </div>
+      <div class="role-row">
+        <div class="role-pill rp-m" id="m3RoleA">🪞 거울</div>
+        <div class="role-pill rp-w" id="m3RoleB">🌟 표현친구</div>
+      </div>
+      <div class="m3-card" id="m3Card">
+        <div class="m3-cat" id="m3Cat">노력</div>
+        <div class="m3-txt" id="m3Txt">끝까지 해내다니 대단해!</div>
+      </div>
+      <div class="pbar-wrap" style="opacity:.7;">
+        <div class="pbar-labels">
+          <span id="m3RtLeft">60초</span>
+          <span class="clabel" style="color:var(--purple);">전체 시간</span>
+          <span id="m3RtRight">60초</span>
+        </div>
+        <div class="pbar-bg" style="height:9px;"><div class="pbar-fill" id="m3RtFill" style="width:100%;background:var(--purple);height:9px;"></div></div>
+      </div>
+    </div>
+    <div class="m3-bottom">
+      <button class="btn btn-ghost" style="font-size:13px;padding:10px 14px;" id="m3Add15">+15초</button>
+      <button class="btn btn-ghost" style="font-size:13px;padding:10px 14px;" id="m3Add30">+30초</button>
+      <button class="btn btn-purple" id="m3SwapBtn">🔄 역할 바꾸기</button>
+      <button class="btn btn-ghost" style="font-size:13px;padding:10px 14px;" id="m3StopBtn">⏹ 중단</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BANNER ══ -->
+<div id="banner">
+  <div class="b-icon">🔄</div>
+  <div class="b-title">역할 바꿔요!</div>
+  <div class="b-sub">거울 ↔ 표현친구를 바꿔요</div>
+  <button class="b-btn" id="bannerBtn">계속 하기 ▶</button>
+</div>
+
+<!-- ══ END POPUP ══ -->
+<div id="endPopup">
+  <div class="end-card">
+    <div class="end-deco">🎉</div>
+    <div class="end-title" id="endTitle">잘했어요!</div>
+    <div class="end-sub" id="endSub">오늘도 신나게 놀았어요!</div>
+    <button class="end-btn" id="endBtn">처음으로 돌아가기</button>
+  </div>
+</div>
+
+<audio id="bgmAudio" style="display:none;">
+  <source src="깡충깡충.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// ══════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════
+var PROMPTS = [
+  // 동물 (15)
+  {e:'🐸',n:'개구리',c:'동물'},{e:'🐱',n:'고양이',c:'동물'},{e:'🐶',n:'강아지',c:'동물'},
+  {e:'🐻',n:'곰',c:'동물'},{e:'🐰',n:'토끼',c:'동물'},{e:'🦁',n:'사자',c:'동물'},
+  {e:'🐘',n:'코끼리',c:'동물'},{e:'🦒',n:'기린',c:'동물'},{e:'🐧',n:'펭귄',c:'동물'},
+  {e:'🦋',n:'나비',c:'동물'},{e:'🐢',n:'거북이',c:'동물'},{e:'🦘',n:'캥거루',c:'동물'},
+  {e:'🐒',n:'원숭이',c:'동물'},{e:'🐊',n:'악어',c:'동물'},{e:'🦆',n:'오리',c:'동물'},
+  // 캐릭터 (8) — 따라하기 쉬운 것만
+  {e:'🧙',n:'마법사',c:'캐릭터'},{e:'🤖',n:'로봇',c:'캐릭터'},{e:'🦸',n:'슈퍼히어로',c:'캐릭터'},
+  {e:'👨‍🍳',n:'요리사',c:'캐릭터'},{e:'🧑‍🚒',n:'소방관',c:'캐릭터'},
+  {e:'🧑‍🚀',n:'우주인',c:'캐릭터'},{e:'🧑‍⚕️',n:'의사',c:'캐릭터'},{e:'👸',n:'공주',c:'캐릭터'},
+  // 탈것 (8)
+  {e:'✈️',n:'비행기',c:'탈것'},{e:'🚂',n:'기차',c:'탈것'},{e:'🚀',n:'로켓',c:'탈것'},
+  {e:'⛵',n:'돛단배',c:'탈것'},{e:'🏎️',n:'자동차',c:'탈것'},
+  {e:'🚁',n:'헬리콥터',c:'탈것'},{e:'🤿',n:'잠수함',c:'탈것'},{e:'🏍️',n:'오토바이',c:'탈것'},
+  // 날씨·자연 (9)
+  {e:'⛈️',n:'천둥번개',c:'날씨'},{e:'🌊',n:'파도',c:'날씨'},{e:'🌪️',n:'바람',c:'날씨'},
+  {e:'☀️',n:'태양',c:'날씨'},{e:'❄️',n:'눈',c:'날씨'},
+  {e:'🌈',n:'무지개',c:'날씨'},{e:'🌋',n:'화산',c:'날씨'},{e:'💧',n:'폭포',c:'날씨'},{e:'🌏',n:'지진',c:'날씨'},
+  // 감정 표현 (8) — 표정 → 표현
+  {e:'😄',n:'기쁜 표현',c:'감정'},{e:'😢',n:'슬픈 표현',c:'감정'},{e:'😮',n:'놀란 표현',c:'감정'},
+  {e:'😴',n:'졸린 표현',c:'감정'},{e:'😡',n:'화난 표현',c:'감정'},
+  {e:'😨',n:'무서운 표현',c:'감정'},{e:'😳',n:'부끄러운 표현',c:'감정'},{e:'🤩',n:'신난 표현',c:'감정'},
+  // 긍정 단어 (10) — 새로 추가!
+  {e:'💪',n:'자신감',c:'긍정'},{e:'🌟',n:'최고',c:'긍정'},{e:'❤️',n:'사랑',c:'긍정'},
+  {e:'😊',n:'행복',c:'긍정'},{e:'🙌',n:'신남',c:'긍정'},{e:'🌈',n:'희망',c:'긍정'},
+  {e:'🔥',n:'열정',c:'긍정'},{e:'✨',n:'반짝반짝',c:'긍정'},{e:'🤗',n:'따뜻함',c:'긍정'},
+  {e:'🎉',n:'신나는 날',c:'긍정'}
+];
+
+var PHRASES = [
+  // 👍 행동 칭찬 (14) — 네가 한 일
+  {cat:'행동', text:'도와줘서 고마워!'},
+  {cat:'행동', text:'나눠줘서 고마워!'},
+  {cat:'행동', text:'기다려줘서 고마워!'},
+  {cat:'행동', text:'정리해줘서 고마워!'},
+  {cat:'행동', text:'규칙 잘 지켜서 멋졌어!'},
+  {cat:'행동', text:'먼저 와서 기다려줘서 고마워!'},
+  {cat:'행동', text:'조용히 들어줘서 고마워!'},
+  {cat:'행동', text:'양보해줘서 기분 좋아!'},
+  {cat:'행동', text:'같이 치워줘서 빨리 끝났어!'},
+  {cat:'행동', text:'문 잡아줘서 고마워!'},
+  {cat:'행동', text:'약속 지켜줘서 믿음이 가!'},
+  {cat:'행동', text:'먼저 인사해줘서 좋았어!'},
+  {cat:'행동', text:'빌려줘서 고마워!'},
+  {cat:'행동', text:'같이 해줘서 고마워!'},
+
+  // 💪 노력 칭찬 (14) — 열심히 한 것
+  {cat:'노력', text:'포기 안 해서 멋져!'},
+  {cat:'노력', text:'끝까지 해내다니 대단해!'},
+  {cat:'노력', text:'다시 도전해서 멋있어!'},
+  {cat:'노력', text:'혼자서 해내다니 대단해!'},
+  {cat:'노력', text:'실수해도 괜찮아, 멋졌어!'},
+  {cat:'노력', text:'계속 연습한 모습이 멋졌어!'},
+  {cat:'노력', text:'어려워도 웃으면서 했어!'},
+  {cat:'노력', text:'한 번 더 해보는 게 대단해!'},
+  {cat:'노력', text:'집중해서 하는 모습이 멋져!'},
+  {cat:'노력', text:'스스로 해내서 자랑스러워!'},
+  {cat:'노력', text:'할 수 있어, 응원해!'},
+  {cat:'노력', text:'잘 될 거야, 믿어!'},
+  {cat:'노력', text:'천천히 해도 괜찮아!'},
+  {cat:'노력', text:'도전하는 모습이 멋져!'},
+
+  // 😊 마음·존재 칭찬 (14) — 너라는 사람 자체
+  {cat:'마음', text:'네 마음이 따뜻해!'},
+  {cat:'마음', text:'같이 있으면 편해!'},
+  {cat:'마음', text:'너는 친절해!'},
+  {cat:'마음', text:'씩씩해서 멋져!'},
+  {cat:'마음', text:'네가 있어서 좋아!'},
+  {cat:'마음', text:'넌 참 따뜻한 사람이야!'},
+  {cat:'마음', text:'네가 내 친구여서 행복해!'},
+  {cat:'마음', text:'위로해줘서 고마워!'},
+  {cat:'마음', text:'먼저 말 걸어줘서 고마워!'},
+  {cat:'마음', text:'같이 있어줘서 든든해!'},
+  {cat:'마음', text:'너랑 있으면 재미있어!'},
+  {cat:'마음', text:'네가 웃으면 나도 좋아!'},
+  {cat:'마음', text:'너는 정말 좋은 친구야!'},
+  {cat:'마음', text:'네 덕분에 기분이 좋아!'},
+
+  // ✨ 외모·표현 칭찬 (12) — 보이는 모습
+  {cat:'외모', text:'웃는 얼굴이 예뻐!'},
+  {cat:'외모', text:'목소리가 또박또박해서 좋아!'},
+  {cat:'외모', text:'웃어줘서 기분 좋아!'},
+  {cat:'외모', text:'눈이 반짝반짝해!'},
+  {cat:'외모', text:'오늘 옷이 예뻐!'},
+  {cat:'외모', text:'목소리가 좋아!'},
+  {cat:'외모', text:'춤추는 모습이 멋져!'},
+  {cat:'외모', text:'그림 진짜 잘 그려!'},
+  {cat:'외모', text:'달리기 진짜 빨라!'},
+  {cat:'외모', text:'노래 잘 부른다!'},
+  {cat:'외모', text:'블록 진짜 잘 쌓아!'},
+  {cat:'외모', text:'점프 진짜 높이 뛰어!'},
+
+  // ❤️ 한마디 칭찬 (14) — 짧지만 힘이 되는 말
+  {cat:'한마디', text:'사랑해!'},
+  {cat:'한마디', text:'좋아해!'},
+  {cat:'한마디', text:'고마워!'},
+  {cat:'한마디', text:'최고야!'},
+  {cat:'한마디', text:'멋져!'},
+  {cat:'한마디', text:'잘했어!'},
+  {cat:'한마디', text:'대단해!'},
+  {cat:'한마디', text:'힘내!'},
+  {cat:'한마디', text:'파이팅!'},
+  {cat:'한마디', text:'응원해!'},
+  {cat:'한마디', text:'할 수 있어!'},
+  {cat:'한마디', text:'괜찮아!'},
+  {cat:'한마디', text:'잘 될 거야!'},
+  {cat:'한마디', text:'믿어!'}
+];
+
+// Story slide data
+var STORY = [
+  { deco:'💬', title:'말 한마디의 힘', type:'body',
+    body:'우리가 매일 쓰는 말에는 <strong>놀라운 힘</strong>이 있어요.<br><br>따뜻한 말 한마디는 친구의 마음을 <em>활짝 피어나게</em> 하고,<br>차가운 말은 꽃잎을 시들게 해요.<br><br>지금 우리가 쓰는 말이 서로의 마음에<br><strong>꽃씨</strong>가 될 수 있어요.' },
+  { deco:'🌱', title:'칭찬 말이 자라는 방법', type:'body',
+    body:'칭찬은 그냥 "잘했어!"보다<br><strong>구체적으로</strong> 말할수록 더 잘 전해져요.<br><br><em>"기다려줘서 고마워!"</em><br>→ 친구가 무엇을 했는지 알 수 있어요<br><br><em>"포기 안 해서 멋져!"</em><br>→ 친구의 노력이 보였다는 걸 알 수 있어요<br><br>이런 말을 들으면 <strong>심장이 두근두근</strong>해져요!' },
+  { deco:'🗣️', title:'이런 칭찬 말들이 있어요', type:'cats' },
+  { deco:'🪞', title:'이렇게 놀아요!', type:'how',
+    steps:[
+      {color:'#2BBFA0', icon:'🔊', text:'<strong>문장이 소리로 나와요</strong><br>화면에 칭찬 문장이 뜨고 바로 읽어줘요'},
+      {color:'#F5A623', icon:'🪞', text:'<strong>거울 친구가 표현해요</strong><br>소리 내어 말하면서 어울리는 동작을 만들어요'},
+      {color:'#7C5CBF', icon:'👁', text:'<strong>거울 친구가 따라해요</strong><br>표현친구의 말과 동작을 그대로 따라 해요'},
+      {color:'#FF6B52', icon:'🔄', text:'<strong>시간이 끝나면 역할 바꿔요</strong><br>1라운드 뒤 거울↔관찰자 역할을 바꿔요'}
+    ]}
+];
+
+// Cat display info for story slide
+var CAT_DISPLAY = [
+  {key:'행동',  label:'👍 행동 칭찬',  sub:'네가 한 일',        color:'#2BBFA0', bg:'#D6F5EE',
+   words:['도와줘서 고마워!','나눠줘서 고마워!','기다려줘서 고마워!','정리해줘서 고마워!','양보해줘서 기분 좋아!','약속 지켜줘서 믿음이 가!']},
+  {key:'노력',  label:'💪 노력 칭찬',  sub:'열심히 한 것',      color:'#FF6B52', bg:'#FFE8E4',
+   words:['포기 안 해서 멋져!','끝까지 해내다니 대단해!','다시 도전해서 멋있어!','계속 연습한 모습이 멋졌어!','한 번 더 해보는 게 대단해!','스스로 해내서 자랑스러워!']},
+  {key:'마음',  label:'😊 마음·존재 칭찬', sub:'너라는 사람 자체', color:'#7C5CBF', bg:'#EDE9FF',
+   words:['네 마음이 따뜻해!','같이 있으면 편해!','네가 있어서 좋아!','넌 참 따뜻한 사람이야!','네가 내 친구여서 행복해!','같이 있어줘서 든든해!']},
+  {key:'외모',  label:'✨ 외모·표현 칭찬', sub:'보이는 모습',     color:'#F5A623', bg:'#FFF4DC',
+   words:['웃는 얼굴이 예뻐!','목소리가 또박또박해서 좋아!','눈이 반짝반짝해!','춤추는 모습이 멋져!','그림 진짜 잘 그려!','달리기 진짜 빨라!']},
+  {key:'한마디',label:'❤️ 한마디 칭찬', sub:'짧지만 힘이 되는 말', color:'#E86FA0', bg:'#FFEBF4',
+   words:['사랑해!','좋아해!','고마워!','최고야!','멋져!','파이팅!']}
+];
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+var bgmOn = false;
+var audioCtx = null;
+var bannerCb = null;
+
+// M1
+var m1Sec = 45, m1Remain = 45, m1Sub = 'instant';
+var m1Timer = null, m1Swapped = false;
+
+// M2
+var m2PtSec = 10, m2RtSec = 60, m2IsAuto = true;
+var m2Remain = 10, m2RtRemain = 60;
+var m2PtTimer = null, m2RtTimer = null;
+var m2Swapped = false, m2Idx = 0, m2Order = [];
+
+// M3
+var m3Extra = [];
+var m3PtSec = 15, m3RtSec = 45;
+var m3PtRemain = 10, m3RtRemain = 60;
+var m3PtTimer = null, m3RtTimer = null;
+var m3Pool = [], m3Used = [], m3Swapped = false;
+
+// Story
+var sIdx = 0;
+
+// ══════════════════════════════════════════════════
+//  AUDIO
+// ══════════════════════════════════════════════════
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function beep(freq, dur, type, vol) {
+  var ctx = getCtx();
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = type || 'sine'; o.frequency.value = freq;
+  var t = ctx.currentTime;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol || 0.1, t + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.start(t); o.stop(t + dur + 0.01);
+}
+function sndClick()  { beep(700, 0.08, 'sine', 0.08); }
+function sndNext()   { beep(523, 0.15, 'triangle', 0.08); setTimeout(function(){ beep(659, 0.15, 'triangle', 0.08); }, 80); }
+function sndChime()  { [523,659,784,1047].forEach(function(f,i){ setTimeout(function(){ beep(f, 0.38, 'sine', 0.13); }, i*120); }); }
+function sndTimeup() { [784,659,523].forEach(function(f,i){ setTimeout(function(){ beep(f, 0.35, 'sine', 0.15); }, i*150); }); }
+
+// BGM — 3곡 순서대로 이어 재생
+var bgmAudio = document.getElementById('bgmAudio');
+bgmAudio.volume = 0.3;
+var BGM_LIST = [
+  '깡충깡충.mp3',
+  '뛰어볼까.mp3',
+  '빙글빙글.mp3',
+  '몸이랑.mp3'
+];
+var bgmIdx = 0;
+
+bgmAudio.addEventListener('ended', function() {
+  bgmIdx = (bgmIdx + 1) % BGM_LIST.length;
+  bgmAudio.src = BGM_LIST[bgmIdx];
+  bgmAudio.play().catch(function(){});
+});
+
+function startBgm() {
+  bgmAudio.src = BGM_LIST[bgmIdx];
+  bgmAudio.play().catch(function(){});
+}
+function stopBgm() {
+  bgmAudio.pause();
+  bgmAudio.currentTime = 0;
+}
+function toggleBgm() {
+  bgmOn = !bgmOn;
+  updateBgmBtns();
+  if (bgmOn) startBgm();
+  else stopBgm();
+}
+function updateBgmBtns() {
+  ['bgmBtn','bgmBtn1','bgmBtn2','bgmBtn3'].forEach(function(id){
+    var el = document.getElementById(id); if (!el) return;
+    el.textContent = bgmOn ? '🎵' : '🔇';
+  });
+}
+
+// TTS
+function speak(txt) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(txt);
+  u.lang = 'ko-KR'; u.rate = 0.82; u.pitch = 1.1; u.volume = 1.0;
+  var prevVol = bgmAudio.volume;
+  bgmAudio.volume = Math.min(prevVol, 0.03);
+  u.onend   = function() { bgmAudio.volume = prevVol; };
+  u.onerror = function() { bgmAudio.volume = prevVol; };
+  window.speechSynthesis.speak(u);
+}
+
+// Click ripple
+document.addEventListener('click', function(e) {
+  sndClick();
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;border-radius:50%;pointer-events:none;background:rgba(43,191,160,.18);' +
+    'width:56px;height:56px;left:'+(e.clientX-28)+'px;top:'+(e.clientY-28)+'px;z-index:9999;' +
+    'animation:cffall .45s ease-out forwards;transform:scale(0);';
+  // reuse cffall but override
+  d.style.animation = 'none';
+  d.style.transform = 'scale(0)';
+  document.body.appendChild(d);
+  requestAnimationFrame(function(){
+    d.style.transition = 'transform .4s ease-out, opacity .4s ease-out';
+    d.style.transform = 'scale(3.5)';
+    d.style.opacity = '0';
+  });
+  setTimeout(function(){ d.remove(); }, 450);
+});
+
+// ══════════════════════════════════════════════════
+//  CONFETTI + END
+// ══════════════════════════════════════════════════
+function confetti() {
+  var cols = ['#2BBFA0','#F5A623','#FF6B52','#7C5CBF','#4DA8DA','#E86FA0','#52C46A','#FFD700'];
+  for (var i = 0; i < 90; i++) {
+    (function(i){
+      setTimeout(function(){
+        var el = document.createElement('div'); el.className = 'cfti';
+        var sz = 8 + Math.random() * 8;
+        el.style.cssText = 'left:'+(Math.random()*100)+'vw;top:-10px;width:'+sz+'px;height:'+sz+'px;' +
+          'background:'+cols[Math.floor(Math.random()*cols.length)]+';' +
+          'border-radius:'+(Math.random()>.5?'50%':'2px')+';' +
+          'animation-duration:'+(1.6+Math.random()*2)+'s;';
+        document.body.appendChild(el);
+        setTimeout(function(){ el.remove(); }, 3800);
+      }, i * 28);
+    })(i);
+  }
+}
+function showEnd(title, sub) {
+  sndTimeup(); confetti();
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('endSub').innerHTML = sub;
+  document.getElementById('endPopup').classList.add('on');
+}
+
+// ══════════════════════════════════════════════════
+//  NAV HELPERS
+// ══════════════════════════════════════════════════
+function go(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('on'); });
+  document.getElementById(id).classList.add('on');
+}
+function killTimers() {
+  clearInterval(m1Timer); clearInterval(m2PtTimer); clearInterval(m2RtTimer);
+  clearInterval(m3PtTimer); clearInterval(m3RtTimer);
+}
+function goHome() { killTimers(); window.speechSynthesis && window.speechSynthesis.cancel(); go('home'); }
+
+// banner
+function openBanner() { document.getElementById('banner').classList.add('on'); }
+function closeBanner() {
+  document.getElementById('banner').classList.remove('on');
+  if (bannerCb) { var cb = bannerCb; bannerCb = null; cb(); }
+}
+
+// show/hide helpers for elements (flex or none)
+function show(id, flex) { var el=document.getElementById(id); if(el){ el.style.display=flex?'flex':'block'; } }
+function hide(id)       { var el=document.getElementById(id); if(el){ el.style.display='none'; } }
+
+// role update helper
+function setRoles(aId, bId, swapped) {
+  var a=document.getElementById(aId), b=document.getElementById(bId);
+  if(!a||!b) return;
+  if(!swapped){ a.textContent='🪞 거울'; a.className='role-pill rp-m'; b.textContent='🌟 표현친구'; b.className='role-pill rp-w'; }
+  else        { a.textContent='🌟 표현친구'; a.className='role-pill rp-w'; b.textContent='🪞 거울'; b.className='role-pill rp-m'; }
+}
+
+// ══════════════════════════════════════════════════
+//  MODE 1
+// ══════════════════════════════════════════════════
+function openM1() {
+  show('m1Sel', true); hide('m1Setup'); hide('m1Play');
+  document.getElementById('m1Title').textContent = '모드 1 — 몸으로 따라하기';
+  go('mode1');
+}
+function showM1Setup(sub) {
+  m1Sub = sub;
+  hide('m1Sel'); show('m1Setup', true); hide('m1Play');
+  document.getElementById('m1SetVal').textContent = m1Sec + '초';
+  document.getElementById('m1PromptTxt').textContent = sub === 'instant'
+    ? '🪞 거울이 자유롭게 동작하면\n👁 관찰자가 바로 따라해요!'
+    : '🪞 거울 친구가 먼저 동작을 해요!\n잠깐 기다렸다가 그대로 따라해 주세요!';
+}
+function beginM1() {
+  m1Swapped = false; m1Remain = m1Sec;
+  hide('m1Setup'); show('m1Play', true);
+  document.getElementById('m1SubLabel').textContent = m1Sub==='instant' ? '⚡ 바로 따라하기' : '🧠 기억하고 따라하기';
+  setRoles('m1RoleA','m1RoleB', false);
+  updateM1Ring(); runM1();
+}
+function updateM1Ring() {
+  var pct = m1Remain / m1Sec;
+  var ring = document.getElementById('m1Ring');
+  var num  = document.getElementById('m1Num');
+  ring.style.strokeDashoffset = 314 * (1 - pct);
+  var col = pct > .5 ? 'var(--teal)' : pct > .25 ? 'var(--amber)' : 'var(--coral)';
+  ring.style.stroke = col; num.style.color = col; num.textContent = m1Remain;
+}
+function runM1() {
+  clearInterval(m1Timer);
+  m1Timer = setInterval(function(){
+    m1Remain--; updateM1Ring();
+    if (m1Remain <= 0) {
+      clearInterval(m1Timer);
+      if (!m1Swapped) {
+        m1Swapped = true; setRoles('m1RoleA','m1RoleB', true);
+        m1Remain = m1Sec; updateM1Ring();
+        bannerCb = function(){ runM1(); };
+        sndChime(); openBanner();
+      } else {
+        hide('m1Play');
+        showEnd('다 했어요! 🎉', '친구와 함께<br>멋지게 해냈어요!');
+      }
+    }
+  }, 1000);
+}
+
+// M1 events
+document.getElementById('hBtn1').addEventListener('click', openM1);
+document.getElementById('m1Back').addEventListener('click', function(){
+  if (document.getElementById('m1Play').style.display !== 'none') { clearInterval(m1Timer); hide('m1Play'); show('m1Setup',true); return; }
+  if (document.getElementById('m1Setup').style.display !== 'none') { hide('m1Setup'); show('m1Sel',true); return; }
+  goHome();
+});
+document.getElementById('m1SubInstant').addEventListener('click', function(){ showM1Setup('instant'); });
+document.getElementById('m1SubMemory').addEventListener('click',  function(){ showM1Setup('memory'); });
+document.getElementById('m1SetupBack').addEventListener('click', function(){ hide('m1Setup'); show('m1Sel',true); });
+document.getElementById('m1Minus').addEventListener('click', function(){ m1Sec=Math.max(15,m1Sec-15); document.getElementById('m1SetVal').textContent=m1Sec+'초'; });
+document.getElementById('m1Plus').addEventListener('click',  function(){ m1Sec=Math.min(300,m1Sec+15); document.getElementById('m1SetVal').textContent=m1Sec+'초'; });
+document.getElementById('m1StartBtn').addEventListener('click', beginM1);
+document.getElementById('m1SwapBtn').addEventListener('click', function(){
+  m1Swapped = !m1Swapped; setRoles('m1RoleA','m1RoleB', m1Swapped);
+  clearInterval(m1Timer); m1Remain = m1Sec; updateM1Ring();
+  sndChime(); bannerCb = function(){ runM1(); }; openBanner();
+});
+document.getElementById('m1StopBtn').addEventListener('click', function(){ clearInterval(m1Timer); hide('m1Play'); show('m1Setup',true); });
+
+// ══════════════════════════════════════════════════
+//  MODE 2
+// ══════════════════════════════════════════════════
+function openM2() {
+  m2PtSec=10; m2RtSec=45; m2IsAuto=true;
+  document.getElementById('m2PtV').textContent='10초';
+  document.getElementById('m2RtV').textContent='45초';
+  document.getElementById('m2Auto').classList.add('on');
+  document.getElementById('m2Manual').classList.remove('on');
+  show('m2Setup',true); hide('m2Play');
+  document.getElementById('m2Title').textContent='모드 2 — 제시어 표현하기';
+  go('mode2');
+}
+function beginM2() {
+  m2Swapped=false; m2Remain=m2PtSec; m2RtRemain=m2RtSec;
+  hide('m2Setup'); show('m2Play',true);
+  document.getElementById('m2Title').textContent='모드 2 — 진행 중';
+  document.getElementById('m2PtRight').textContent=m2PtSec+'초';
+  document.getElementById('m2RtRight').textContent=m2RtSec+'초';
+  setRoles('m2RoleA','m2RoleB',false);
+  buildM2Pool(); m2Idx=0; showPrompt();
+  startM2Pt(); startM2Rt();
+}
+function stopM2() {
+  clearInterval(m2PtTimer); clearInterval(m2RtTimer);
+  hide('m2Play'); show('m2Setup',true);
+  document.getElementById('m2Title').textContent='모드 2 — 제시어 표현하기';
+}
+function buildM2Pool() {
+  m2Order = PROMPTS.map(function(_,i){ return i; });
+  for (var k=m2Order.length-1; k>0; k--) {
+    var r=Math.floor(Math.random()*(k+1)), tmp=m2Order[k]; m2Order[k]=m2Order[r]; m2Order[r]=tmp;
+  }
+}
+function showPrompt() {
+  if (m2Idx >= m2Order.length) { buildM2Pool(); m2Idx=0; }
+  var p = PROMPTS[m2Order[m2Idx]];
+  var el = document.getElementById('m2Emoji');
+  el.style.animation='none'; void el.offsetWidth; el.style.animation='bounce .5s ease';
+  el.textContent=p.e;
+  document.getElementById('m2Name').textContent=p.n;
+  document.getElementById('m2Cat').textContent=p.c;
+  speak(p.n);
+}
+function nextPrompt() {
+  m2Idx++; sndNext(); showPrompt();
+  m2Remain=m2PtSec; updateM2PtBar();
+  clearInterval(m2PtTimer); if(m2IsAuto) startM2Pt();
+}
+function startM2Pt() {
+  clearInterval(m2PtTimer); m2Remain=m2PtSec; updateM2PtBar();
+  m2PtTimer=setInterval(function(){ m2Remain--; updateM2PtBar(); if(m2Remain<=0) nextPrompt(); }, 1000);
+}
+function startM2Rt() {
+  clearInterval(m2RtTimer);
+  m2RtTimer=setInterval(function(){
+    m2RtRemain--; updateM2RtBar();
+    if(m2RtRemain<=0){
+      clearInterval(m2PtTimer); clearInterval(m2RtTimer);
+      hide('m2Play');
+      showEnd('다 했어요! 🎉','신나게 표현했어요!<br>정말 잘했어요!');
+    }
+  }, 1000);
+}
+function updateM2PtBar() {
+  var pct=(m2Remain/m2PtSec)*100;
+  var f=document.getElementById('m2PtFill');
+  f.style.width=pct+'%';
+  f.style.background=pct>60?'var(--amber)':pct>30?'var(--coral)':'#e03030';
+  document.getElementById('m2PtLeft').textContent=m2Remain+'초';
+}
+function updateM2RtBar() {
+  var pct=(m2RtRemain/m2RtSec)*100;
+  var f=document.getElementById('m2RtFill');
+  f.style.width=pct+'%';
+  f.style.background=pct>50?'var(--purple)':pct>25?'var(--amber)':'var(--coral)';
+  document.getElementById('m2RtLeft').textContent=m2RtRemain+'초';
+}
+
+// M2 events
+document.getElementById('hBtn2').addEventListener('click', openM2);
+document.getElementById('m2Back').addEventListener('click', function(){
+  if (document.getElementById('m2Play').style.display!=='none'){ stopM2(); return; }
+  goHome();
+});
+document.getElementById('m2Auto').addEventListener('click', function(){
+  m2IsAuto=true; this.classList.add('on'); document.getElementById('m2Manual').classList.remove('on');
+  clearInterval(m2PtTimer); if(document.getElementById('m2Play').style.display!=='none') startM2Pt();
+});
+document.getElementById('m2Manual').addEventListener('click', function(){
+  m2IsAuto=false; this.classList.add('on'); document.getElementById('m2Auto').classList.remove('on');
+  clearInterval(m2PtTimer); m2Remain=m2PtSec; updateM2PtBar();
+});
+document.getElementById('m2PtM').addEventListener('click', function(){ m2PtSec=Math.max(5,m2PtSec-5); document.getElementById('m2PtV').textContent=m2PtSec+'초'; });
+document.getElementById('m2PtP').addEventListener('click', function(){ m2PtSec=Math.min(60,m2PtSec+5); document.getElementById('m2PtV').textContent=m2PtSec+'초'; });
+document.getElementById('m2RtM').addEventListener('click', function(){ m2RtSec=Math.max(15,m2RtSec-15); document.getElementById('m2RtV').textContent=m2RtSec+'초'; });
+document.getElementById('m2RtP').addEventListener('click', function(){ m2RtSec=Math.min(300,m2RtSec+15); document.getElementById('m2RtV').textContent=m2RtSec+'초'; });
+document.getElementById('m2StartBtn').addEventListener('click', beginM2);
+document.getElementById('m2NextBtn').addEventListener('click', nextPrompt);
+document.getElementById('m2Card').addEventListener('click', nextPrompt);
+document.getElementById('m2SwapBtn').addEventListener('click', function(){
+  m2Swapped=!m2Swapped; setRoles('m2RoleA','m2RoleB',m2Swapped);
+  sndChime(); bannerCb=function(){}; openBanner();
+});
+document.getElementById('m2StopBtn').addEventListener('click', stopM2);
+
+// ══════════════════════════════════════════════════
+//  MODE 3 — STORY
+// ══════════════════════════════════════════════════
+function buildSlideHTML(s) {
+  var h = '<div class="s-deco">'+s.deco+'</div><div class="s-title">'+s.title+'</div>';
+  if (s.type==='body') {
+    h += '<div class="s-body">'+s.body+'</div>';
+  } else if (s.type==='cats') {
+    h += '<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;flex-shrink:0;" id="catTabRow">';
+    CAT_DISPLAY.forEach(function(ci, i){
+      h += '<button class="cat-tab-btn'+(i===0?' cat-tab-on':'')+'" data-cidx="'+i+'" style="'+(i===0?'background:'+ci.color+';color:#fff;border-color:'+ci.color+';':'border-color:'+ci.color+';color:'+ci.color+';')+'">'+ci.label+'</button>';
+    });
+    h += '</div>';
+    h += '<div style="text-align:center;font-size:12px;color:var(--muted);flex-shrink:0;" id="catSub">👉 '+CAT_DISPLAY[0].sub+'</div>';
+    h += '<div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;padding:4px 0;" id="catWords">';
+    CAT_DISPLAY[0].words.forEach(function(w){
+      h += '<div class="s-word" data-txt="'+w+'" style="background:'+CAT_DISPLAY[0].color+'22;border-color:'+CAT_DISPLAY[0].color+';color:'+CAT_DISPLAY[0].color+';">'+w+'</div>';
+    });
+    h += '</div>';
+    h += '<div style="font-size:11px;color:var(--muted);">말풍선을 누르면 소리로 들을 수 있어요!</div>';
+  } else if (s.type==='how') {
+    h += '<div class="how-list">';
+    s.steps.forEach(function(st,j){
+      h += '<div class="how-step"><div class="how-num" style="background:'+st.color+';">'+(j+1)+'</div><div class="how-txt">'+st.icon+' '+st.text+'</div></div>';
+    });
+    h += '</div>';
+  }
+  return h;
+}
+
+function initStory() {
+  var area = document.getElementById('slides');
+  var dotWrap = document.getElementById('dots');
+  area.innerHTML=''; dotWrap.innerHTML='';
+  STORY.forEach(function(s,i){
+    var div = document.createElement('div');
+    div.className = 'slide' + (i===0?' on':'');
+    div.id = 'sl'+i;
+    div.innerHTML = buildSlideHTML(s);
+    area.appendChild(div);
+    var dot = document.createElement('div');
+    dot.className = 'dot' + (i===0?' on':'');
+    dot.addEventListener('click', function(){ goSlide(i); });
+    dotWrap.appendChild(dot);
+  });
+  // word tap + cat tab
+  area.addEventListener('click', function(e){
+    var el = e.target;
+    while (el && el !== area) {
+      if (el.dataset && el.dataset.txt) { speak(el.dataset.txt); return; }
+      if (el.dataset && el.dataset.cidx !== undefined) {
+        var idx = parseInt(el.dataset.cidx);
+        var ci = CAT_DISPLAY[idx];
+        // update tab styles
+        var tabs = document.querySelectorAll('.cat-tab-btn');
+        tabs.forEach(function(t){
+          var ti = parseInt(t.dataset.cidx);
+          var tc = CAT_DISPLAY[ti];
+          if (ti === idx) { t.classList.add('cat-tab-on'); t.style.background=tc.color; t.style.color='#fff'; t.style.borderColor=tc.color; }
+          else { t.classList.remove('cat-tab-on'); t.style.background='transparent'; t.style.color=tc.color; t.style.borderColor=tc.color; }
+        });
+        // update sub text
+        var subEl = document.getElementById('catSub');
+        if (subEl) subEl.textContent = '👉 ' + ci.sub;
+        // update words
+        var wordsEl = document.getElementById('catWords');
+        if (wordsEl) {
+          wordsEl.innerHTML = '';
+          ci.words.forEach(function(w){
+            var d = document.createElement('div');
+            d.className = 's-word';
+            d.dataset.txt = w;
+            d.style.background = ci.color+'22';
+            d.style.borderColor = ci.color;
+            d.style.color = ci.color;
+            d.textContent = w;
+            wordsEl.appendChild(d);
+          });
+        }
+        return;
+      }
+      el = el.parentElement;
+    }
+  });
+  sIdx=0; updateStoryNav();
+}
+
+function goSlide(idx) {
+  var old=document.getElementById('sl'+sIdx);
+  if(old){ old.classList.remove('on'); old.classList.add('out'); }
+  var tid=sIdx; setTimeout(function(){ var o=document.getElementById('sl'+tid); if(o) o.classList.remove('out'); },380);
+  sIdx=idx;
+  var nw=document.getElementById('sl'+sIdx); if(nw) nw.classList.add('on');
+  var dots=document.getElementById('dots').children;
+  for(var i=0;i<dots.length;i++) dots[i].classList.toggle('on',i===sIdx);
+  updateStoryNav();
+}
+function updateStoryNav(){
+  var prev=document.getElementById('sPrev'), next=document.getElementById('sNext');
+  prev.style.opacity=sIdx===0?'0.3':'1'; prev.disabled=sIdx===0;
+  if(sIdx===STORY.length-1){ next.textContent='시작 설정하러 가기 →'; next.style.background='var(--teal)'; }
+  else{ next.textContent='다음 →'; next.style.background='var(--coral)'; }
+}
+
+function openM3(){
+  show('m3Story',true); hide('m3Prep'); hide('m3Play');
+  document.getElementById('m3Title').textContent='모드 3 — 칭찬 이야기';
+  initStory(); go('mode3');
+}
+function showM3Prep(){
+  hide('m3Story'); show('m3Prep',true); hide('m3Play');
+  document.getElementById('m3Title').textContent='모드 3 — 시작 설정';
+  renderM3Chips();
+}
+
+// M3 story events
+document.getElementById('hBtn3').addEventListener('click', openM3);
+document.getElementById('sPrev').addEventListener('click', function(){ if(sIdx>0) goSlide(sIdx-1); });
+document.getElementById('sNext').addEventListener('click', function(){
+  if(sIdx<STORY.length-1) goSlide(sIdx+1); else showM3Prep();
+});
+
+// ══════════════════════════════════════════════════
+//  MODE 3 — PREP
+// ══════════════════════════════════════════════════
+function renderM3Chips(){
+  var wrap=document.getElementById('m3Chips'); wrap.innerHTML='';
+  m3Extra.forEach(function(txt,i){
+    var c=document.createElement('div'); c.className='chip on';
+    c.textContent=txt+' ✕';
+    c.addEventListener('click',function(e){ e.stopPropagation(); m3Extra.splice(i,1); renderM3Chips(); });
+    wrap.appendChild(c);
+  });
+}
+function addM3Phrase(){
+  var inp=document.getElementById('m3NewInp');
+  var v=inp.value.trim(); if(!v) return;
+  m3Extra.push(v.endsWith('!')?v:v+'!'); inp.value=''; renderM3Chips();
+}
+document.getElementById('m3NewInp').addEventListener('keydown',function(e){ if(e.key==='Enter') addM3Phrase(); });
+document.getElementById('m3AddBtn').addEventListener('click', addM3Phrase);
+document.getElementById('ptM').addEventListener('click',function(){ m3PtSec=Math.max(5,m3PtSec-5); document.getElementById('ptV').textContent=m3PtSec+'초'; });
+document.getElementById('ptP').addEventListener('click',function(){ m3PtSec=Math.min(60,m3PtSec+5); document.getElementById('ptV').textContent=m3PtSec+'초'; });
+document.getElementById('rtM').addEventListener('click',function(){ m3RtSec=Math.max(15,m3RtSec-15); document.getElementById('rtV').textContent=m3RtSec+'초'; });
+document.getElementById('rtP').addEventListener('click',function(){ m3RtSec=Math.min(300,m3RtSec+15); document.getElementById('rtV').textContent=m3RtSec+'초'; });
+
+// ══════════════════════════════════════════════════
+//  MODE 3 — PLAY
+// ══════════════════════════════════════════════════
+var CAT_BORDER = {행동:'var(--teal)',노력:'var(--coral)',마음:'var(--purple)',외모:'var(--amber)',한마디:'var(--pink)',직접입력:'#999'};
+var CAT_CLS    = {행동:'cp-hd',노력:'cp-nr',마음:'cp-mm',외모:'cp-td',한마디:'cp-gw',직접입력:'cp-etc'};
+
+function startM3(){
+  m3Pool = PHRASES.slice();
+  m3Extra.forEach(function(t){ m3Pool.push({cat:'직접입력',text:t}); });
+  m3Used=[]; m3Swapped=false;
+  m3PtRemain=m3PtSec; m3RtRemain=m3RtSec;
+  hide('m3Prep'); show('m3Play',true);
+  document.getElementById('m3Title').textContent='모드 3 — 진행 중';
+  document.getElementById('m3PtRight').textContent=m3PtSec+'초';
+  document.getElementById('m3RtRight').textContent=m3RtSec+'초';
+  setRoles('m3RoleA','m3RoleB',false);
+  nextM3(); runM3Pt(); runM3Rt();
+}
+function nextM3(){
+  sndNext();
+  if(!m3Pool.length) return;
+  if(m3Used.length>=m3Pool.length) m3Used=[];
+  var idx, t=0;
+  do { idx=Math.floor(Math.random()*m3Pool.length); t++; }
+  while(m3Used.indexOf(idx)>=0 && t<40);
+  m3Used.push(idx);
+  var p=m3Pool[idx];
+  var card=document.getElementById('m3Card');
+  card.style.transform='scale(.91)'; card.style.opacity='.4';
+  setTimeout(function(){
+    var cat=document.getElementById('m3Cat');
+    cat.className='m3-cat '+(CAT_CLS[p.cat]||'cp-etc');
+    cat.textContent=p.cat;
+    document.getElementById('m3Txt').textContent=p.text;
+    card.style.borderColor=CAT_BORDER[p.cat]||'var(--coral)';
+    card.style.transform='scale(1)'; card.style.opacity='1';
+    card.style.transition='transform .22s cubic-bezier(.34,1.5,.64,1),opacity .18s';
+    setTimeout(function(){ card.style.transition='border-color .3s'; speak(p.text); },220);
+  },140);
+}
+function runM3Pt(){
+  clearInterval(m3PtTimer); m3PtRemain=m3PtSec; updateM3PtBar();
+  m3PtTimer=setInterval(function(){ m3PtRemain--; updateM3PtBar(); if(m3PtRemain<=0){ m3PtRemain=m3PtSec; nextM3(); } },1000);
+}
+function runM3Rt(){
+  clearInterval(m3RtTimer);
+  m3RtTimer=setInterval(function(){
+    m3RtRemain--; updateM3RtBar();
+    if(m3RtRemain<=0){
+      clearInterval(m3PtTimer); clearInterval(m3RtTimer);
+      if(!m3Swapped){
+        m3Swapped=true; setRoles('m3RoleA','m3RoleB',true);
+        m3RtRemain=m3RtSec; m3PtRemain=m3PtSec;
+        updateM3PtBar(); updateM3RtBar();
+        bannerCb=function(){ nextM3(); runM3Pt(); runM3Rt(); };
+        sndChime(); openBanner();
+      } else {
+        hide('m3Play');
+        showEnd('다 했어요! 🎉','따뜻한 칭찬 말로<br>친구들 마음이 따뜻해졌어요!');
+      }
+    }
+  },1000);
+}
+function updateM3PtBar(){
+  var pct=(m3PtRemain/m3PtSec)*100;
+  var f=document.getElementById('m3PtFill');
+  f.style.width=pct+'%';
+  f.style.background=pct>50?'var(--coral)':pct>25?'var(--amber)':'#e03030';
+  document.getElementById('m3PtLeft').textContent=m3PtRemain+'초';
+}
+function updateM3RtBar(){
+  var pct=(m3RtRemain/m3RtSec)*100;
+  var f=document.getElementById('m3RtFill');
+  f.style.width=pct+'%';
+  f.style.background=pct>50?'var(--purple)':pct>25?'var(--amber)':'var(--coral)';
+  document.getElementById('m3RtLeft').textContent=m3RtRemain+'초';
+}
+
+// M3 events
+document.getElementById('m3Back').addEventListener('click', function(){
+  if(document.getElementById('m3Play').style.display!=='none'){ clearInterval(m3PtTimer);clearInterval(m3RtTimer); hide('m3Play'); show('m3Prep',true); return; }
+  if(document.getElementById('m3Prep').style.display!=='none'){ hide('m3Prep'); show('m3Story',true); document.getElementById('m3Title').textContent='모드 3 — 칭찬 이야기'; return; }
+  goHome();
+});
+document.getElementById('m3StartBtn').addEventListener('click', startM3);
+document.getElementById('m3SwapBtn').addEventListener('click', function(){
+  clearInterval(m3PtTimer); clearInterval(m3RtTimer);
+  m3Swapped=!m3Swapped; setRoles('m3RoleA','m3RoleB',m3Swapped);
+  m3RtRemain=m3RtSec; m3PtRemain=m3PtSec;
+  updateM3PtBar(); updateM3RtBar();
+  sndChime(); bannerCb=function(){ nextM3(); runM3Pt(); runM3Rt(); }; openBanner();
+});
+document.getElementById('m3Add15').addEventListener('click', function(){ m3RtRemain+=15; m3RtSec+=15; document.getElementById('m3RtRight').textContent=m3RtSec+'초'; updateM3RtBar(); sndNext(); });
+document.getElementById('m3Add30').addEventListener('click', function(){ m3RtRemain+=30; m3RtSec+=30; document.getElementById('m3RtRight').textContent=m3RtSec+'초'; updateM3RtBar(); sndNext(); });
+document.getElementById('m3StopBtn').addEventListener('click', function(){ clearInterval(m3PtTimer);clearInterval(m3RtTimer); m3RtSec=60; hide('m3Play'); show('m3Prep',true); });
+
+// ══════════════════════════════════════════════════
+//  SHARED EVENTS
+// ══════════════════════════════════════════════════
+document.getElementById('bgmBtn').addEventListener('click',  function(e){ e.stopPropagation(); toggleBgm(); });
+
+// 볼륨 슬라이더 — 모든 화면 동기화
+function setVol(v) {
+  bgmAudio.volume = v / 100;
+  ['volSlider','volSlider1','volSlider2','volSlider3'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = v;
+  });
+}
+['volSlider','volSlider1','volSlider2','volSlider3'].forEach(function(id){
+  var el = document.getElementById(id);
+  if (el) el.addEventListener('input', function(e){ e.stopPropagation(); setVol(this.value); });
+});
+document.getElementById('bgmBtn1').addEventListener('click', function(e){ e.stopPropagation(); toggleBgm(); });
+document.getElementById('bgmBtn2').addEventListener('click', function(e){ e.stopPropagation(); toggleBgm(); });
+document.getElementById('bgmBtn3').addEventListener('click', function(e){ e.stopPropagation(); toggleBgm(); });
+document.getElementById('bannerBtn').addEventListener('click', closeBanner);
+document.getElementById('endBtn').addEventListener('click', function(){
+  document.getElementById('endPopup').classList.remove('on');
+  goHome();
+});
+
+// ══════════════════════════════════════════════════
+//  짝꿍 정하기
+// ══════════════════════════════════════════════════
+var pairNames = [];
+
+document.getElementById('hBtnPair').addEventListener('click', function(){
+  show('pairSetup', true); hide('pairResult');
+  renderPairChips();
+  go('pairScreen');
+});
+document.getElementById('pairBack').addEventListener('click', function(){ goHome(); });
+document.getElementById('pairAddBtn').addEventListener('click', addPairName);
+document.getElementById('pairInp').addEventListener('keydown', function(e){ if(e.key==='Enter') addPairName(); });
+document.getElementById('pairShuffleBtn').addEventListener('click', shufflePairs);
+document.getElementById('pairAgainBtn').addEventListener('click', shufflePairs);
+document.getElementById('pairBackToSetup').addEventListener('click', function(){
+  show('pairSetup', true); hide('pairResult');
+});
+
+function addPairName() {
+  var inp = document.getElementById('pairInp');
+  var v = inp.value.trim(); if(!v) return;
+  if(pairNames.indexOf(v) >= 0) { inp.value=''; return; }
+  pairNames.push(v); inp.value='';
+  renderPairChips();
+}
+
+function renderPairChips() {
+  var wrap = document.getElementById('pairChips'); wrap.innerHTML='';
+  pairNames.forEach(function(name, i){
+    var c = document.createElement('div'); c.className='chip on';
+    c.style.background='var(--purple-l)'; c.style.borderColor='var(--purple)'; c.style.color='var(--purple)';
+    c.textContent = name + ' ✕';
+    c.addEventListener('click', function(e){
+      e.stopPropagation(); pairNames.splice(i,1); renderPairChips();
+    });
+    wrap.appendChild(c);
+  });
+  document.getElementById('pairCount').textContent = pairNames.length + '명';
+  document.getElementById('pairShuffleBtn').style.opacity = pairNames.length >= 2 ? '1' : '0.4';
+}
+
+function shufflePairs() {
+  if(pairNames.length < 2) { return; }
+
+  // 짝 만들기
+  var arr = pairNames.slice();
+  for(var i=arr.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1)),tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;
+  }
+  var pairs = [];
+  var idx = 0;
+  while(idx < arr.length){
+    if(idx===arr.length-3 && arr.length%2===1){ pairs.push([arr[idx],arr[idx+1],arr[idx+2]]); idx+=3; }
+    else { pairs.push([arr[idx],arr[idx+1]]); idx+=2; }
+  }
+
+  // 결과 칩 초기화
+  var cards = document.getElementById('pairCards'); cards.innerHTML='';
+  document.getElementById('pairResultTitle').textContent = '마구마구 섞는 중... 🌀';
+  hide('pairSetup'); show('pairResult', true);
+
+  // 스테이지에 이름 태그 생성
+  var stage = document.getElementById('pairStage');
+  stage.innerHTML='';
+  var sw = stage.offsetWidth || 580;
+  var sh = stage.offsetHeight || 200;
+  var tagEls = {};
+  pairNames.forEach(function(name){
+    var tag = document.createElement('div');
+    tag.className = 'name-tag';
+    tag.textContent = name;
+    tag.style.left = (20 + Math.random()*(sw-120))+'px';
+    tag.style.top  = (10 + Math.random()*(sh-50))+'px';
+    stage.appendChild(tag);
+    tagEls[name] = tag;
+  });
+
+  // 1단계: 마구 섞기 3회
+  var moveCount = 0;
+  function scramble() {
+    pairNames.forEach(function(name){
+      var tag = tagEls[name];
+      tag.classList.add('mixing');
+      tag.style.left = (20 + Math.random()*(sw-120))+'px';
+      tag.style.top  = (10 + Math.random()*(sh-50))+'px';
+      tag.style.transform = 'rotate('+(Math.random()*28-14)+'deg)';
+    });
+    moveCount++;
+    if(moveCount < 4) setTimeout(scramble, 340);
+    else setTimeout(settle, 420);
+  }
+  setTimeout(scramble, 80);
+
+  // 2단계: 짝끼리 모이기
+  function settle() {
+    document.getElementById('pairResultTitle').textContent = '짝꿍끼리 모이는 중... 💞';
+    var cols = Math.min(3, pairs.length);
+    var rows = Math.ceil(pairs.length/cols);
+    pairs.forEach(function(pair, pi){
+      var col = pi%cols, row = Math.floor(pi/cols);
+      var cx = (col+0.5)/cols*sw;
+      var cy = (row+0.5)/rows*sh;
+      pair.forEach(function(name, ni){
+        var tag = tagEls[name];
+        tag.classList.remove('mixing');
+        tag.style.transform='rotate(0deg)';
+        tag.style.background='var(--purple-l)';
+        tag.style.color='#3C3489';
+        var offset = (ni-(pair.length-1)/2)*(pair.length===3?52:58);
+        tag.style.left = (cx-45+offset)+'px';
+        tag.style.top  = (cy-20)+'px';
+      });
+    });
+    setTimeout(showResults, 900);
+  }
+
+  // 3단계: 결과 칩 순서대로 등장
+  function showResults() {
+    document.getElementById('pairResultTitle').textContent = '오늘의 짝꿍! 🎉';
+    stage.style.display='none';
+    pairs.forEach(function(pair, pi){
+      var chip = document.createElement('div');
+      chip.className = 'pair-chip-result';
+      var vs = pair.length===3 ? pair[0]+' · '+pair[1]+' · '+pair[2] : pair[0]+' ↔ '+pair[1];
+      chip.innerHTML = '<div class="pnum">'+(pi+1)+'팀</div>'+vs;
+      cards.appendChild(chip);
+      setTimeout(function(){
+        chip.classList.add('show');
+        var freqs=[523,587,659,698,784,880];
+        beep(freqs[pi%freqs.length],0.22,'sine',0.12);
+      }, pi*220);
+    });
+    setTimeout(function(){
+      confetti();
+      stage.style.display='';
+    }, pairs.length*220+300);
+  }
+}
+
+</script>
+</body>
+</html>
